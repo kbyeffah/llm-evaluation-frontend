@@ -103,7 +103,7 @@ export default function Home() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Highlight>Nural AI</Highlight>
+              <Highlight>Eval AI</Highlight>
             </motion.h1>
             <motion.div
               className="absolute top-4 right-0 sm:top-8 sm:right-0"
