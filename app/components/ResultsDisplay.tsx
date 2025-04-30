@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { motion, useAnimation } from "framer-motion";
-import { Progress } from "@/components/ui/progress";
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { motion, useAnimation } from 'framer-motion';
+import { Progress } from '@/components/ui/progress';
 import ReactMarkdown from 'react-markdown';
 
 interface Response {
@@ -22,11 +22,13 @@ interface ResultsDisplayProps {
   aggregateScores: {
     [key: string]: number;
   };
+  variants?: any; // Add variants prop for Framer Motion
 }
 
 export function ResultsDisplay({
   results,
   aggregateScores,
+  variants,
 }: ResultsDisplayProps) {
   // Explicitly type animatedScores as number[]
   const [animatedScores, setAnimatedScores] = useState<number[]>(
@@ -100,9 +102,9 @@ export function ResultsDisplay({
         {results.responses.map((response, index) => (
           <motion.div
             key={response.model || index}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
+            variants={variants} // Apply the variants prop for staggered animation
+            initial="hidden"
+            animate="visible"
           >
             <Card className="h-full flex flex-col overflow-hidden group">
               <CardHeader>
@@ -155,9 +157,9 @@ export function ResultsDisplay({
 }
 
 function getScoreVariant(score: number) {
-  if (score >= 4) return "default";
-  if (score >= 3) return "secondary";
-  return "destructive";
+  if (score >= 4) return 'default';
+  if (score >= 3) return 'secondary';
+  return 'destructive';
 }
 
 function CircularProgress({
