@@ -1,7 +1,7 @@
 'use client';
 import { cn } from '../utils/cn';
-import { useMotionValue, motion, useMotionTemplate } from 'framer-motion';
-import React, { useEffect, useRef } from 'react';
+import { useMotionValue, motion, useMotionTemplate, AnimatePresence } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
 
 export const HeroHighlight = ({
   children,
@@ -14,6 +14,11 @@ export const HeroHighlight = ({
 }) => {
   let mouseX = useMotionValue(0);
   let mouseY = useMotionValue(0);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    setIsLoaded(true);
+  }, []);
 
   function handleMouseMove({
     currentTarget,
@@ -27,73 +32,98 @@ export const HeroHighlight = ({
     mouseY.set(clientY - top);
   }
 
+  const background = useMotionTemplate`
+    radial-gradient(300px circle at ${mouseX}px ${mouseY}px, 
+      rgba(14, 165, 233, 0.15), 
+      rgba(99, 102, 241, 0.1), 
+      transparent 80%)
+  `;
+
   return (
     <div
       className={cn(
-        'relative min-h-screen flex items-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-800 justify-center w-full group overflow-hidden',
+        'relative min-h-screen flex items-center justify-center w-full group overflow-hidden bg-black',
         containerClassName
       )}
       onMouseMove={handleMouseMove}
     >
-      {/* Wave Background */}
+      {/* Animated Mesh Background */}
       <motion.div
-        className="absolute inset-0 opacity-30"
-        style={{
-          backgroundImage: `
-            radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.2), transparent 50%),
-            url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%236366f1" fill-opacity="0.3" d="M0,128L48,138.7C96,149,192,171,288,181.3C384,192,480,192,576,186.7C672,181,768,171,864,149.3C960,128,1056,96,1152,85.3C1248,75,1344,85,1392,90.7L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"%3E%3C/path%3E%3C/svg%3E')
-          `,
-          backgroundSize: 'cover, 100% 100%',
-          backgroundPosition: 'center, 0 0',
-        }}
+        className="absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 2 }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.15)_1px,transparent_0)] bg-[length:20px_20px] opacity-20" />
+      </motion.div>
+
+      {/* Dynamic Gradient Orbs */}
+      <motion.div
+        className="absolute top-0 -left-4 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-30"
         animate={{
-          backgroundPosition: ['center, 0 0', 'center, 100% 100%'],
+          x: [0, 100, 0],
+          y: [0, -100, 0],
+          scale: [1, 1.2, 1],
         }}
         transition={{
-          duration: 10,
+          duration: 20,
           repeat: Infinity,
-          repeatType: 'reverse',
-          ease: 'linear',
+          ease: "easeInOut"
         }}
       />
-
-      {/* Aurora Glow Effect */}
       <motion.div
-        className="absolute inset-0 opacity-20"
-        style={{
-          background: 'radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.3), transparent 70%), radial-gradient(circle at 70% 70%, rgba(31, 118, 106, 0.3), transparent 70%)',
-        }}
+        className="absolute top-0 -right-4 w-72 h-72 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl opacity-30"
         animate={{
-          background: [
-            'radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.3), transparent 70%), radial-gradient(circle at 70% 70%, rgba(31, 118, 106, 0.3), transparent 70%)',
-            'radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.2), transparent 70%), radial-gradient(circle at 60% 60%, rgba(31, 118, 106, 0.2), transparent 70%)',
-            'radial-gradient(circle at 30% 30%, rgba(99, 102, 241, 0.3), transparent 70%), radial-gradient(circle at 70% 70%, rgba(31, 118, 106, 0.3), transparent 70%)',
-          ],
+          x: [0, -100, 0],
+          y: [0, 100, 0],
+          scale: [1, 1.3, 1],
         }}
         transition={{
-          duration: 15,
+          duration: 25,
           repeat: Infinity,
-          repeatType: 'loop',
-          ease: 'easeInOut',
+          ease: "easeInOut"
+        }}
+      />
+      <motion.div
+        className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-30"
+        animate={{
+          x: [0, -50, 0],
+          y: [0, -200, 0],
+          scale: [1, 1.1, 1],
+        }}
+        transition={{
+          duration: 30,
+          repeat: Infinity,
+          ease: "easeInOut"
         }}
       />
 
-      {/* Grid Overlay */}
-      <div
-        className="absolute inset-0 opacity-10"
-        style={{
-          backgroundImage: `
-            linear-gradient(to right, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(255, 255, 255, 0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: '40px 40px',
-        }}
+      {/* Mouse Follow Effect */}
+      <motion.div
+        className="absolute inset-0 opacity-40 transition duration-300"
+        style={{ background }}
       />
 
-      {/* Particle Effect */}
-      <ParticleEffect mouseX={mouseX} mouseY={mouseY} />
+      {/* Floating Elements */}
+      <FloatingElements />
 
-      <div className={cn('relative z-20', className)}>{children}</div>
+      {/* Neural Network Lines */}
+      <NeuralNetwork mouseX={mouseX} mouseY={mouseY} />
+
+      {/* Content */}
+      <AnimatePresence>
+        {isLoaded && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className={cn('relative z-20', className)}
+          >
+            {children}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
@@ -109,32 +139,72 @@ export const Highlight = ({
     <motion.span
       initial={{
         backgroundSize: '0% 100%',
+        backgroundPosition: 'left center',
       }}
       animate={{
         backgroundSize: '100% 100%',
       }}
+      whileHover={{
+        backgroundSize: '110% 100%',
+      }}
       transition={{
         duration: 2,
-        ease: 'linear',
+        ease: [0.4, 0.0, 0.2, 1],
         delay: 0.5,
       }}
       style={{
         backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'left center',
         display: 'inline',
       }}
       className={cn(
-        'relative inline-block pb-1 px-1 rounded-lg bg-gradient-to-r from-indigo-300 to-purple-300 dark:from-indigo-500 dark:to-teal-800',
+        'relative inline-block pb-1 px-1 rounded-lg bg-gradient-to-r from-blue-400 via-purple-500 to-cyan-400 text-white font-bold',
         className
       )}
     >
-      {children}
+      <motion.span
+        className="relative z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+      >
+        {children}
+      </motion.span>
     </motion.span>
   );
 };
 
-// Particle Effect Component
-const ParticleEffect = ({ mouseX, mouseY }: { mouseX: any; mouseY: any }) => {
+// Floating Elements Component
+const FloatingElements = () => {
+  const elements = Array.from({ length: 6 }, (_, i) => i);
+
+  return (
+    <>
+      {elements.map((_, index) => (
+        <motion.div
+          key={index}
+          className="absolute w-2 h-2 bg-white/20 rounded-full"
+          initial={{
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+          }}
+          animate={{
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+          }}
+          transition={{
+            duration: Math.random() * 10 + 20,
+            repeat: Infinity,
+            repeatType: "reverse",
+            ease: "linear",
+          }}
+        />
+      ))}
+    </>
+  );
+};
+
+// Neural Network Component
+const NeuralNetwork = ({ mouseX, mouseY }: { mouseX: any; mouseY: any }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -145,72 +215,76 @@ const ParticleEffect = ({ mouseX, mouseY }: { mouseX: any; mouseY: any }) => {
     if (!ctx) return;
 
     let animationFrameId: number;
-    const particles: Array<{
+    const nodes: Array<{
       x: number;
       y: number;
-      size: number;
-      speedX: number;
-      speedY: number;
+      vx: number;
+      vy: number;
+      connections: number[];
     }> = [];
 
-    // Initialize particles
-    const particleCount = 50;
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
+    // Initialize nodes
+    const nodeCount = 25;
+    for (let i = 0; i < nodeCount; i++) {
+      nodes.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        size: Math.random() * 3 + 1,
-        speedX: Math.random() * 1 - 0.5,
-        speedY: Math.random() * 1 - 0.5,
+        vx: (Math.random() - 0.5) * 1,
+        vy: (Math.random() - 0.5) * 1,
+        connections: [],
       });
     }
 
     const animate = () => {
       if (!ctx || !canvas) return;
 
-      // Clear canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Update and draw particles
-      particles.forEach((particle) => {
-        particle.x += particle.speedX;
-        particle.y += particle.speedY;
-
-        // Bounce off edges
-        if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1;
-        if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1;
-
-        // Draw particle
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(99, 102, 241, 0.5)';
-        ctx.fill();
-      });
-
-      // Draw lines between particles near the mouse
       const mouseXVal = mouseX.get();
       const mouseYVal = mouseY.get();
 
-      particles.forEach((particleA, i) => {
-        particles.slice(i + 1).forEach((particleB) => {
-          const distanceToMouseA = Math.sqrt(
-            (particleA.x - mouseXVal) ** 2 + (particleA.y - mouseYVal) ** 2
-          );
-          const distanceToMouseB = Math.sqrt(
-            (particleB.x - mouseXVal) ** 2 + (particleB.y - mouseYVal) ** 2
-          );
+      // Update node positions
+      nodes.forEach((node) => {
+        node.x += node.vx;
+        node.y += node.vy;
 
-          if (distanceToMouseA < 150 && distanceToMouseB < 150) {
-            const distance = Math.sqrt(
-              (particleA.x - particleB.x) ** 2 + (particleA.y - particleB.y) ** 2 // Fixed typo: particle263.y -> particleA.y
-            );
-            if (distance < 100) {
-              ctx.beginPath();
-              ctx.moveTo(particleA.x, particleA.y);
-              ctx.lineTo(particleB.x, particleB.y);
-              ctx.strokeStyle = `rgba(99, 102, 241, ${1 - distance / 100})`;
-              ctx.stroke();
-            }
+        // Bounce off edges
+        if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
+        if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
+
+        // Mouse attraction
+        const distToMouse = Math.sqrt(
+          (node.x - mouseXVal) ** 2 + (node.y - mouseYVal) ** 2
+        );
+        
+        if (distToMouse < 200) {
+          const force = (200 - distToMouse) / 200;
+          const angle = Math.atan2(mouseYVal - node.y, mouseXVal - node.x);
+          node.vx += Math.cos(angle) * force * 0.02;
+          node.vy += Math.sin(angle) * force * 0.02;
+        }
+
+        // Draw node
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(99, 102, 241, ${distToMouse < 200 ? 0.8 : 0.4})`;
+        ctx.fill();
+      });
+
+      // Draw connections
+      nodes.forEach((nodeA, i) => {
+        nodes.slice(i + 1).forEach((nodeB) => {
+          const distance = Math.sqrt(
+            (nodeA.x - nodeB.x) ** 2 + (nodeA.y - nodeB.y) ** 2
+          );
+          
+          if (distance < 150) {
+            ctx.beginPath();
+            ctx.moveTo(nodeA.x, nodeA.y);
+            ctx.lineTo(nodeB.x, nodeB.y);
+            ctx.strokeStyle = `rgba(99, 102, 241, ${0.6 - distance / 250})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
           }
         });
       });
@@ -218,7 +292,6 @@ const ParticleEffect = ({ mouseX, mouseY }: { mouseX: any; mouseY: any }) => {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    // Update canvas size
     const resizeCanvas = () => {
       if (canvas) {
         canvas.width = window.innerWidth;
@@ -239,7 +312,7 @@ const ParticleEffect = ({ mouseX, mouseY }: { mouseX: any; mouseY: any }) => {
   return (
     <canvas
       ref={canvasRef}
-      className="absolute inset-0 pointer-events-none"
+      className="absolute inset-0 pointer-events-none opacity-30"
     />
   );
 };
