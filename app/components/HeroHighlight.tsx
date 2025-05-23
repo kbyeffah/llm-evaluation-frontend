@@ -1,4 +1,5 @@
-'use client';
+"use client";
+
 import { cn } from '../utils/cn';
 import { useMotionValue, motion, useMotionTemplate, AnimatePresence } from 'framer-motion';
 import React, { useEffect, useRef, useState } from 'react';
@@ -175,7 +176,23 @@ export const Highlight = ({
 
 // Floating Elements Component
 const FloatingElements = () => {
+  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
   const elements = Array.from({ length: 6 }, (_, i) => i);
+
+  useEffect(() => {
+    // Set dimensions only in the browser
+    if (typeof window !== 'undefined') {
+      const updateDimensions = () => {
+        setDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      };
+      updateDimensions();
+      window.addEventListener('resize', updateDimensions);
+      return () => window.removeEventListener('resize', updateDimensions);
+    }
+  }, []);
 
   return (
     <>
@@ -184,12 +201,12 @@ const FloatingElements = () => {
           key={index}
           className="absolute w-2 h-2 bg-white/20 rounded-full"
           initial={{
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
+            x: dimensions.width ? Math.random() * dimensions.width : 0,
+            y: dimensions.height ? Math.random() * dimensions.height : 0,
           }}
           animate={{
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
+            x: dimensions.width ? Math.random() * dimensions.width : 0,
+            y: dimensions.height ? Math.random() * dimensions.height : 0,
           }}
           transition={{
             duration: Math.random() * 10 + 20,
@@ -293,7 +310,7 @@ const NeuralNetwork = ({ mouseX, mouseY }: { mouseX: any; mouseY: any }) => {
     };
 
     const resizeCanvas = () => {
-      if (canvas) {
+      if (canvas && typeof window !== 'undefined') {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
       }
